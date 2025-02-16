@@ -14,3 +14,13 @@ Header.jsx
 로그아웃 기능
 Editor.jsx
 할 일 추가 
+
+기능Api
+
+>https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_1.png
+
+>https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_2.png
+
+>https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_3.png
+
+>https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_4.png
