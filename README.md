@@ -13,7 +13,9 @@ Header.jsx
 날짜 선택 / 이동
 로그아웃 기능
 Editor.jsx
-할 일 추가 
+할 일 추가 GetDataModal.jsx(모달 팝업)과 함께 사용
+List.jsx
+
 
 기능Api
 
