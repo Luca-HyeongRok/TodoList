@@ -18,3 +18,9 @@ Editor.jsx
 기능Api
 
 ![Api1](https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_1.png)
+
+![Api2](https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_2.png)
+
+![Api3](https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_3.png)
+
+![Api4](https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_4.png)
