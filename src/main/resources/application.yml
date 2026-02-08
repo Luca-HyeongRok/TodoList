@@ -10,9 +10,8 @@
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
-    defer-datasource-initialization: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -21,9 +20,12 @@
           characterEncoding: utf8
           charSet: utf8mb4
           useUnicode: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
   sql:
     init:
-      mode: always
+      mode: never
       encoding: UTF-8
 server:
   servlet:
