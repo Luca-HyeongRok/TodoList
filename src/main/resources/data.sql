@@ -1,3 +1,6 @@
+﻿-- noinspection SqlResolveForFile
+-- language=MySQL
+
 INSERT IGNORE INTO users (user_id, username, password) VALUES ('testUser', '테스트 유저', '1234');
 
 INSERT IGNORE INTO list_tb (content, priority, start_date, end_date, done, user_id)

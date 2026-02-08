@@ -24,8 +24,10 @@
   sql:
     init:
       mode: always
+      encoding: UTF-8
 server:
   servlet:
     session:
       tracking-modes: cookie
+
 
