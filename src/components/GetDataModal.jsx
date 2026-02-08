@@ -14,7 +14,6 @@ const GetDataModal = ({
   const [content, setContent] = useState(initialContent || "");
   const [priority, setPriority] = useState(initialPriority || 3);
 
-  // 선택한 날짜의 00:00:00으로 설정
   const [startDate, setStartDate] = useState(
     initialStartDate
       ? new Date(new Date(initialStartDate).setHours(0, 0, 0, 0))
@@ -27,7 +26,7 @@ const GetDataModal = ({
 
   const handleEndDateChange = (date) => {
     if (date <= startDate) {
-      alert("종료일은 시작일보다 이후여야 합니다!");
+      alert("종료일은 시작일보다 이후여야 합니다.");
       return;
     }
     setEndDate(date);
@@ -39,18 +38,13 @@ const GetDataModal = ({
       return;
     }
 
-    onConfirm(
-      content,
-      priority,
-      startDate.toISOString(),
-      endDate.toISOString()
-    );
+    onConfirm(content, priority, startDate.toISOString(), endDate.toISOString());
   };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>할 일 세부사항을 입력하세요</h2>
+          <h2>할 일 세부사항을 입력하세요</h2>
         <div className="form-group">
           <label>할 일</label>
           <input
@@ -62,18 +56,15 @@ const GetDataModal = ({
         </div>
         <div className="form-group">
           <label>중요도</label>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(Number(e.target.value))}
-          >
+          <select value={priority} onChange={(e) => setPriority(Number(e.target.value))}>
             <option value={1}>1 (가장 중요)</option>
             <option value={2}>2 (보통)</option>
             <option value={3}>3 (상관 없음)</option>
           </select>
         </div>
 
-        {/* 시작 날짜 선택 */}
-        <div className="form-group">
+          {/* 시작 날짜 선택 */}
+          <div className="form-group">
           <label>시작 날짜</label>
           <DatePicker
             selected={startDate}
@@ -86,8 +77,8 @@ const GetDataModal = ({
           />
         </div>
 
-        {/* 종료 날짜 선택 */}
-        <div className="form-group">
+          {/* 종료 날짜 선택 */}
+          <div className="form-group">
           <label>종료 날짜</label>
           <DatePicker
             selected={endDate}

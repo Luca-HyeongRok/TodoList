@@ -32,7 +32,7 @@ const Register = () => {
       }
     } catch (error) {
       console.error("회원가입 중 오류 발생", error);
-      alert("서버와의 통신 중 문제가 발생했습니다.");
+      alert("서버와 통신 중 문제가 발생했습니다.");
     }
   };
 

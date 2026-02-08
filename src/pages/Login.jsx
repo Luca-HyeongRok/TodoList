@@ -4,11 +4,10 @@ import { BASE_URL } from "../config";
 import "./Form.css";
 
 const Login = () => {
-  const [userId, setUserId] = useState(""); //
+  const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  //  로그인 요청
   const handleLogin = async () => {
     try {
       const response = await fetch(`${BASE_URL}/users/login`, {
@@ -16,7 +15,7 @@ const Login = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // 세션 쿠키를 포함하여 요청
+        credentials: "include",
         body: JSON.stringify({ userId, password }),
       });
 
@@ -24,7 +23,7 @@ const Login = () => {
         alert("아이디 또는 비밀번호가 올바르지 않습니다.");
         return;
       }
-      // 로그인 후 세션 정보 확인
+
       const sessionResponse = await fetch(`${BASE_URL}/users/session`, {
         method: "GET",
         credentials: "include",
@@ -34,12 +33,13 @@ const Login = () => {
         console.error("세션 확인 실패");
         return;
       }
+
       const userData = await sessionResponse.json();
-      localStorage.setItem("user", JSON.stringify(userData)); //세션 데이터 저장
+      localStorage.setItem("user", JSON.stringify(userData));
       navigate("/home");
     } catch (error) {
       console.error("로그인 중 오류 발생:", error);
-      alert("서버와의 통신 중 문제가 발생했습니다.");
+      alert("서버와 통신 중 문제가 발생했습니다.");
     }
   };
 
