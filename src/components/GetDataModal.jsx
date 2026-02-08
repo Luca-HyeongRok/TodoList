@@ -64,7 +64,7 @@ const GetDataModal = ({
           <label>중요도</label>
           <select
             value={priority}
-            onChange={(e) => setPriority(e.target.value)}
+            onChange={(e) => setPriority(Number(e.target.value))}
           >
             <option value={1}>1 (가장 중요)</option>
             <option value={2}>2 (보통)</option>
@@ -78,6 +78,7 @@ const GetDataModal = ({
           <DatePicker
             selected={startDate}
             onChange={(date) => setStartDate(date)}
+            showMonthYearDropdown
             showTimeSelect
             timeIntervals={30}
             dateFormat="Pp"
@@ -91,6 +92,7 @@ const GetDataModal = ({
           <DatePicker
             selected={endDate}
             onChange={handleEndDateChange}
+            showMonthYearDropdown
             showTimeSelect
             timeIntervals={10}
             dateFormat="Pp"

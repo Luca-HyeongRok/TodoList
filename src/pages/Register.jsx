@@ -24,8 +24,7 @@ const Register = () => {
       });
       const data = await response.json();
 
-      if (data.message === "회원가입 성공") {
-        localStorage.setItem("user", JSON.stringify(data));
+      if (response.ok) {
         alert("회원가입이 성공했습니다. 로그인 해주세요.");
         navigate("/");
       } else {
