@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BASE_URL } from "../config";
+import { BASE_URL, MOCK_MODE } from "../config";
 import "./Form.css";
 
 const Register = () => {
@@ -11,9 +11,16 @@ const Register = () => {
 
   const handleRegister = async () => {
     if (!userId.trim() || !password.trim() || !username.trim()) {
-      alert("모든 필드를 입력해주세요!");
+      alert("모든 필드를 입력해주세요.");
       return;
     }
+
+    if (MOCK_MODE) {
+      alert("목업 모드 회원가입 완료. 로그인해주세요.");
+      navigate("/");
+      return;
+    }
+
     try {
       const response = await fetch(`${BASE_URL}/users/register`, {
         method: "POST",

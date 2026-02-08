@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { BASE_URL } from "../config";
+import { BASE_URL, MOCK_MODE } from "../config";
 
 const Header = ({ selectedDate, setSelectedDate, moveDate }) => {
   const [userName, setUserName] = useState("");
@@ -27,6 +27,13 @@ const Header = ({ selectedDate, setSelectedDate, moveDate }) => {
     const confirmLogout = window.confirm("로그아웃하시겠습니까?");
     if (!confirmLogout) return;
 
+    if (MOCK_MODE) {
+      localStorage.removeItem("user");
+      alert("목업 모드 로그아웃되었습니다.");
+      navigate("/");
+      return;
+    }
+
     try {
       const response = await fetch(`${BASE_URL}/users/logout`, {
         method: "POST",
@@ -34,7 +41,6 @@ const Header = ({ selectedDate, setSelectedDate, moveDate }) => {
       });
 
       if (response.status === 404) {
-        // Backend branch may not have logout endpoint yet.
         console.info("로그아웃 API가 없어 클라이언트 상태만 정리합니다.");
       } else if (!response.ok) {
         console.warn("서버 로그아웃 요청 실패:", response.status);

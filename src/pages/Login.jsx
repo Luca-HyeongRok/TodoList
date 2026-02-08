@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BASE_URL } from "../config";
+import { BASE_URL, MOCK_MODE, MOCK_USER } from "../config";
 import "./Form.css";
 
 const Login = () => {
@@ -9,6 +9,20 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if (!userId.trim() || !password.trim()) {
+      alert("아이디와 비밀번호를 입력해주세요.");
+      return;
+    }
+
+    if (MOCK_MODE) {
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ ...MOCK_USER, userId, username: "목업 사용자" })
+      );
+      navigate("/home");
+      return;
+    }
+
     try {
       const response = await fetch(`${BASE_URL}/users/login`, {
         method: "POST",

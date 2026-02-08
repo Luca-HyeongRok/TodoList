@@ -1,5 +1,5 @@
 import "./Home.css";
-import { BASE_URL } from "../config";
+import { BASE_URL, MOCK_MODE, MOCK_USER } from "../config";
 import { useState, useReducer, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
@@ -8,7 +8,64 @@ import List from "../components/List";
 import Footer from "../components/Footer";
 import { TodoStateContext, TodoDispatchContext } from "../contexts/TodoContext";
 
+const MOCK_TODOS_KEY = "mock_todos";
+
+const formatLocalDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getMockTodos = () => {
+  const raw = localStorage.getItem(MOCK_TODOS_KEY);
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+
+  const now = new Date();
+  const dateStr = formatLocalDate(now);
+  const seeded = [
+    {
+      listId: 1,
+      content: "목업 화면 점검",
+      priority: 1,
+      startDate: `${dateStr}T09:00:00.000Z`,
+      endDate: `${dateStr}T10:00:00.000Z`,
+      done: false,
+    },
+    {
+      listId: 2,
+      content: "디자인 확인",
+      priority: 2,
+      startDate: `${dateStr}T14:00:00.000Z`,
+      endDate: `${dateStr}T15:00:00.000Z`,
+      done: true,
+    },
+  ];
+  localStorage.setItem(MOCK_TODOS_KEY, JSON.stringify(seeded));
+  return seeded;
+};
+
+const saveMockTodos = (todos) => {
+  localStorage.setItem(MOCK_TODOS_KEY, JSON.stringify(todos));
+};
+
 const fetchTodosByDate = async (date) => {
+  if (MOCK_MODE) {
+    const start = new Date(`${date}T00:00:00`);
+    const end = new Date(`${date}T23:59:59`);
+    return getMockTodos().filter((todo) => {
+      const s = new Date(todo.startDate);
+      const e = new Date(todo.endDate);
+      return s <= end && e >= start;
+    });
+  }
+
   try {
     const response = await fetch(`${BASE_URL}/todos/date?date=${date}`, {
       method: "GET",
@@ -26,14 +83,16 @@ const fetchTodosByDate = async (date) => {
   }
 };
 
-const formatLocalDate = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
-
 const checkSession = async () => {
+  if (MOCK_MODE) {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      return JSON.parse(storedUser);
+    }
+    localStorage.setItem("user", JSON.stringify(MOCK_USER));
+    return MOCK_USER;
+  }
+
   try {
     const response = await fetch(`${BASE_URL}/users/session`, {
       method: "GET",
@@ -107,6 +166,23 @@ function Home() {
 
   const onCreate = useCallback(
     async (content, priority, startDate, endDate) => {
+      if (MOCK_MODE) {
+        const all = getMockTodos();
+        const nextId =
+          all.length > 0 ? Math.max(...all.map((t) => t.listId || 0)) + 1 : 1;
+        const newTodo = {
+          listId: nextId,
+          content,
+          priority,
+          startDate,
+          endDate,
+          done: false,
+        };
+        saveMockTodos([...all, newTodo]);
+        loadTodosByDate(selectedDate);
+        return;
+      }
+
       try {
         const response = await fetch(`${BASE_URL}/todos`, {
           method: "POST",
@@ -129,6 +205,15 @@ function Home() {
 
   const onChange = useCallback(
     async (listId, newIsDone) => {
+      if (MOCK_MODE) {
+        const next = getMockTodos().map((todo) =>
+          todo.listId === listId ? { ...todo, done: newIsDone } : todo
+        );
+        saveMockTodos(next);
+        dispatch({ type: "UPDATE", targetId: listId, newIsDone });
+        return;
+      }
+
       try {
         const response = await fetch(`${BASE_URL}/todos/${listId}`, {
           method: "PATCH",
@@ -151,6 +236,23 @@ function Home() {
 
   const onEdit = useCallback(
     async (listId, newContent, newPriority, newStartDate, newEndDate) => {
+      if (MOCK_MODE) {
+        const next = getMockTodos().map((todo) =>
+          todo.listId === listId
+            ? {
+                ...todo,
+                content: newContent,
+                priority: newPriority,
+                startDate: newStartDate,
+                endDate: newEndDate,
+              }
+            : todo
+        );
+        saveMockTodos(next);
+        loadTodosByDate(selectedDate);
+        return;
+      }
+
       try {
         const response = await fetch(`${BASE_URL}/todos/edit/${listId}`, {
           method: "PATCH",
@@ -178,6 +280,13 @@ function Home() {
 
   const onDelete = useCallback(
     async (listId) => {
+      if (MOCK_MODE) {
+        const next = getMockTodos().filter((todo) => todo.listId !== listId);
+        saveMockTodos(next);
+        loadTodosByDate(selectedDate);
+        return;
+      }
+
       try {
         const response = await fetch(`${BASE_URL}/todos/${listId}`, {
           method: "DELETE",

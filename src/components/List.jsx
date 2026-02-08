@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useContext } from "react";
 import "./List.css";
 import TodoItem from "./TodoItem";
 import { TodoStateContext } from "../contexts/TodoContext";
-import { BASE_URL } from "../config";
+import { BASE_URL, MOCK_MODE } from "../config";
 
 const List = () => {
   const todos = useContext(TodoStateContext);
@@ -35,12 +35,21 @@ const List = () => {
     const newSearch = e.target.value;
     setSearch(newSearch);
 
-    if (newSearch === "") {
+    if (newSearch.trim() === "") {
       setFilteredTodos(todos);
-    } else {
-      const searchResults = await fetchSearchResults(newSearch);
-      setFilteredTodos(searchResults);
+      return;
     }
+
+    if (MOCK_MODE) {
+      const localResults = todos.filter((todo) =>
+        (todo.content || "").toLowerCase().includes(newSearch.toLowerCase())
+      );
+      setFilteredTodos(localResults);
+      return;
+    }
+
+    const searchResults = await fetchSearchResults(newSearch);
+    setFilteredTodos(searchResults);
   };
 
   useEffect(() => {
