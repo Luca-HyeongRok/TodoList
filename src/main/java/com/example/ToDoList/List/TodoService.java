@@ -1,6 +1,7 @@
 package com.example.ToDoList.List;
 
 import com.example.ToDoList.exception.NotFoundException;
+import com.example.ToDoList.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class TodoService {
     }
 
     @Transactional
-    public Todo updateTodo(Integer listId, String userId, Todo updatedTodo) {
+    public Todo updateTodo(Integer listId, String userId, TodoUpsertRequest updatedTodo) {
         Todo todo = getOwnedTodo(listId, userId);
 
         todo.setContent(updatedTodo.getContent());
@@ -41,9 +42,9 @@ public class TodoService {
     }
 
     @Transactional
-    public Todo updateTodoCheckbox(Integer listId, String userId, Todo updatedTodo) {
+    public Todo updateTodoCheckbox(Integer listId, String userId, TodoCheckUpdateRequest updatedTodo) {
         Todo todo = getOwnedTodo(listId, userId);
-        todo.setDone(updatedTodo.isDone());
+        todo.setDone(Boolean.TRUE.equals(updatedTodo.getDone()));
         return todoRepository.save(todo);
     }
 
@@ -53,7 +54,15 @@ public class TodoService {
         todoRepository.delete(todo);
     }
 
-    public Todo createTodo(Todo newTodo) {
+    public Todo createTodo(User user, TodoUpsertRequest newTodoRequest) {
+        Todo newTodo = new Todo();
+        newTodo.setContent(newTodoRequest.getContent());
+        newTodo.setPriority(newTodoRequest.getPriority());
+        newTodo.setStartDate(newTodoRequest.getStartDate());
+        newTodo.setEndDate(newTodoRequest.getEndDate());
+        newTodo.setDone(false);
+        newTodo.setUser(user);
+
         return todoRepository.save(newTodo);
     }
 

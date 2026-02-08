@@ -3,6 +3,7 @@ package com.example.ToDoList.user;
 import com.example.ToDoList.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +18,13 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO userDto) {
+    public ResponseEntity<Map<String, String>> registerUser(@Valid @RequestBody RegisterRequest userDto) {
         String response = userService.registerUser(userDto);
         return ResponseEntity.ok(Map.of("message", response));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(HttpServletRequest request, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> login(HttpServletRequest request, @Valid @RequestBody LoginRequest userDTO) {
         User user = userService.authenticate(userDTO.getUserId(), userDTO.getPassword());
 
         HttpSession session = request.getSession();

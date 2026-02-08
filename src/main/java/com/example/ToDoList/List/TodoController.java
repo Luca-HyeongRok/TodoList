@@ -5,18 +5,21 @@ import com.example.ToDoList.exception.UnauthorizedException;
 import com.example.ToDoList.user.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/todos")
+@Validated
 public class TodoController {
 
     private final TodoService todoService;
@@ -39,16 +42,17 @@ public class TodoController {
     }
 
     @PatchMapping("/{listId}")
-    public ResponseEntity<Todo> updateTodoCheck(HttpServletRequest request, @PathVariable Integer listId, @RequestBody Todo updatedTodo) {
+    public ResponseEntity<Todo> updateTodoCheck(HttpServletRequest request, @PathVariable Integer listId,
+                                                @Valid @RequestBody TodoCheckUpdateRequest updatedTodo) {
         User user = getSessionUserOrThrow(request);
         return ResponseEntity.ok(todoService.updateTodoCheckbox(listId, user.getUserId(), updatedTodo));
     }
 
     @PatchMapping("/edit/{listId}")
-    public ResponseEntity<Todo> updateTodo(HttpServletRequest request, @PathVariable Integer listId, @RequestBody Todo updatedTodo) {
+    public ResponseEntity<Todo> updateTodo(HttpServletRequest request, @PathVariable Integer listId,
+                                           @Valid @RequestBody TodoUpsertRequest updatedTodo) {
         User user = getSessionUserOrThrow(request);
-        Todo savedTodo = todoService.updateTodo(listId, user.getUserId(), updatedTodo);
-        return ResponseEntity.ok(savedTodo);
+        return ResponseEntity.ok(todoService.updateTodo(listId, user.getUserId(), updatedTodo));
     }
 
     @DeleteMapping("/{listId}")
@@ -59,12 +63,9 @@ public class TodoController {
     }
 
     @PostMapping
-    public ResponseEntity<Todo> createTodo(HttpServletRequest request, @RequestBody Todo newTodo) {
+    public ResponseEntity<Todo> createTodo(HttpServletRequest request, @Valid @RequestBody TodoUpsertRequest newTodo) {
         User loggedInUser = getSessionUserOrThrow(request);
-        newTodo.setUser(loggedInUser);
-
-        Todo savedTodo = todoService.createTodo(newTodo);
-        return ResponseEntity.ok(savedTodo);
+        return ResponseEntity.ok(todoService.createTodo(loggedInUser, newTodo));
     }
 
     @GetMapping("/date")
@@ -81,20 +82,16 @@ public class TodoController {
             throw new BadRequestException("잘못된 날짜 형식입니다. YYYY-MM-DD 형식이어야 합니다.");
         }
 
-        List<Todo> todos = todoService.findTodosByDate(user.getUserId(), startDateTime, endDateTime);
-        return ResponseEntity.ok(todos);
+        return ResponseEntity.ok(todoService.findTodosByDate(user.getUserId(), startDateTime, endDateTime));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchTodos(HttpServletRequest request, @RequestParam(name = "keyword", required = false) String keyword) {
+    public ResponseEntity<List<Todo>> searchTodos(
+            HttpServletRequest request,
+            @RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수입니다.") String keyword
+    ) {
         User user = getSessionUserOrThrow(request);
-
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Collections.emptyList());
-        }
-
-        List<Todo> results = todoService.searchTodos(user.getUserId(), keyword);
-        return ResponseEntity.ok(results);
+        return ResponseEntity.ok(todoService.searchTodos(user.getUserId(), keyword));
     }
 
     private User getSessionUserOrThrow(HttpServletRequest request) {

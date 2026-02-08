@@ -17,7 +17,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public String registerUser(UserDTO userDto) {
+    public String registerUser(RegisterRequest userDto) {
         Optional<User> existingUser = userRepository.findByUserId(userDto.getUserId());
 
         if (existingUser.isPresent()) {
@@ -31,7 +31,6 @@ public class UserService {
         );
 
         userRepository.save(newUser);
-
         return "회원가입 성공";
     }
 
