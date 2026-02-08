@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "users")
 public class User {
     @Id
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 191)
     private String userId;
 
     @Column(nullable = false)

@@ -28,16 +28,16 @@ public class TodoRepositoryTest {
     private Todo testTodo1;
     private Todo testTodo2;
 
-    // 테스트 데이터를 미리 준비
+    // ?뚯뒪???곗씠?곕? 誘몃━ 以鍮?
     @BeforeEach
     public void setUp() {
-        // 유저 데이터 준비
+        // ?좎? ?곗씠??以鍮?
         testUser = new User();
         testUser.setUserId("testUser");
         testUser.setUsername("Test User");
+        testUser.setPassword("password");
         userRepository.save(testUser);
 
-        // Todo 데이터 준비
         testTodo1 = new Todo();
         testTodo1.setUser(testUser);
         testTodo1.setContent("Test Todo 1");
@@ -53,20 +53,18 @@ public class TodoRepositoryTest {
         todoRepository.save(testTodo2);
     }
 
-    // userId로 Todo를 찾는 쿼리 테스트
     @Test
     public void findByUser_UserId_Test() {
         List<Todo> todos = todoRepository.findByUser_UserId("testUser");
 
         assertNotNull(todos);
-        assertEquals(2, todos.size(), "testUser의 Todo가 2개여야 합니다.");
+        assertEquals(2, todos.size(), "testUser??Todo媛 2媛쒖뿬???⑸땲??");
 
-        // testTodo1과 testTodo2의 내용 확인
+        // testTodo1怨?testTodo2???댁슜 ?뺤씤
         assertTrue(todos.stream().anyMatch(todo -> todo.getContent().equals("Test Todo 1")));
         assertTrue(todos.stream().anyMatch(todo -> todo.getContent().equals("Test Todo 2")));
     }
 
-    // 특정 기간 내에 포함되는 Todo를 찾는 쿼리 테스트
     @Test
     public void findByUserIdAndDate_Test() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(3);
@@ -75,15 +73,14 @@ public class TodoRepositoryTest {
         List<Todo> todos = todoRepository.findByUserIdAndDate("testUser", startDate, endDate);
 
         assertNotNull(todos);
-        assertEquals(2, todos.size(), "testUser의 기간 내 Todo가 2개여야 합니다.");
+        assertEquals(2, todos.size(), "testUser??湲곌컙 ??Todo媛 2媛쒖뿬???⑸땲??");
     }
 
-    // Todo content로 검색하는 쿼리 테스트
     @Test
     public void findByContentContainingIgnoreCase_Test() {
-        List<Todo> todos = todoRepository.findByContentContainingIgnoreCase("Test Todo");
+        List<Todo> todos = todoRepository.findByUser_UserIdAndContentContainingIgnoreCase("testUser", "Test Todo");
 
         assertNotNull(todos);
-        assertEquals(2, todos.size(), "Test Todo를 포함하는 Todo가 2개여야 합니다.");
+        assertEquals(2, todos.size(), "Test Todo瑜??ы븿?섎뒗 Todo媛 2媛쒖뿬???⑸땲??");
     }
 }

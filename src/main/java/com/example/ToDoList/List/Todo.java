@@ -18,7 +18,9 @@ public class Todo {
 
     private String content;
     private int priority;
+    @Column(columnDefinition = "DATETIME")
     private Timestamp startDate;
+    @Column(columnDefinition = "DATETIME")
     private Timestamp endDate;
     private boolean done;
 
