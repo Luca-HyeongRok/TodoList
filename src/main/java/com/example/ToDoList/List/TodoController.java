@@ -2,7 +2,7 @@ package com.example.ToDoList.List;
 
 import com.example.ToDoList.exception.BadRequestException;
 import com.example.ToDoList.exception.UnauthorizedException;
-import com.example.ToDoList.user.User;
+import com.example.ToDoList.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -22,55 +22,59 @@ import java.util.List;
 @Validated
 public class TodoController {
 
+    private static final String SESSION_USER_ID = "userId";
+
     private final TodoService todoService;
+    private final UserService userService;
 
     @Autowired
-    public TodoController(TodoService todoService) {
+    public TodoController(TodoService todoService, UserService userService) {
         this.todoService = todoService;
+        this.userService = userService;
     }
 
     @PostMapping("/user")
     public ResponseEntity<List<Todo>> getTodos(HttpServletRequest request) {
-        User user = getSessionUserOrThrow(request);
-        return ResponseEntity.ok(todoService.findTodosByUserId(user.getUserId()));
+        String userId = getSessionUserIdOrThrow(request);
+        return ResponseEntity.ok(todoService.findTodosByUserId(userId));
     }
 
     @GetMapping("/{listId}")
     public ResponseEntity<Todo> getTodoByListId(HttpServletRequest request, @PathVariable Integer listId) {
-        User user = getSessionUserOrThrow(request);
-        return ResponseEntity.ok(todoService.getTodoById(listId, user.getUserId()));
+        String userId = getSessionUserIdOrThrow(request);
+        return ResponseEntity.ok(todoService.getTodoById(listId, userId));
     }
 
     @PatchMapping("/{listId}")
     public ResponseEntity<Todo> updateTodoCheck(HttpServletRequest request, @PathVariable Integer listId,
                                                 @Valid @RequestBody TodoCheckUpdateRequest updatedTodo) {
-        User user = getSessionUserOrThrow(request);
-        return ResponseEntity.ok(todoService.updateTodoCheckbox(listId, user.getUserId(), updatedTodo));
+        String userId = getSessionUserIdOrThrow(request);
+        return ResponseEntity.ok(todoService.updateTodoCheckbox(listId, userId, updatedTodo));
     }
 
     @PatchMapping("/edit/{listId}")
     public ResponseEntity<Todo> updateTodo(HttpServletRequest request, @PathVariable Integer listId,
                                            @Valid @RequestBody TodoUpsertRequest updatedTodo) {
-        User user = getSessionUserOrThrow(request);
-        return ResponseEntity.ok(todoService.updateTodo(listId, user.getUserId(), updatedTodo));
+        String userId = getSessionUserIdOrThrow(request);
+        return ResponseEntity.ok(todoService.updateTodo(listId, userId, updatedTodo));
     }
 
     @DeleteMapping("/{listId}")
     public ResponseEntity<String> deleteTodo(HttpServletRequest request, @PathVariable Integer listId) {
-        User user = getSessionUserOrThrow(request);
-        todoService.deleteTodo(listId, user.getUserId());
+        String userId = getSessionUserIdOrThrow(request);
+        todoService.deleteTodo(listId, userId);
         return ResponseEntity.ok("삭제 완료");
     }
 
     @PostMapping
     public ResponseEntity<Todo> createTodo(HttpServletRequest request, @Valid @RequestBody TodoUpsertRequest newTodo) {
-        User loggedInUser = getSessionUserOrThrow(request);
-        return ResponseEntity.ok(todoService.createTodo(loggedInUser, newTodo));
+        String userId = getSessionUserIdOrThrow(request);
+        return ResponseEntity.ok(todoService.createTodo(userService.getUserOrThrow(userId), newTodo));
     }
 
     @GetMapping("/date")
     public ResponseEntity<List<Todo>> getTodosByDate(@RequestParam String date, HttpServletRequest request) {
-        User user = getSessionUserOrThrow(request);
+        String userId = getSessionUserIdOrThrow(request);
 
         LocalDateTime startDateTime;
         LocalDateTime endDateTime;
@@ -82,7 +86,7 @@ public class TodoController {
             throw new BadRequestException("잘못된 날짜 형식입니다. YYYY-MM-DD 형식이어야 합니다.");
         }
 
-        return ResponseEntity.ok(todoService.findTodosByDate(user.getUserId(), startDateTime, endDateTime));
+        return ResponseEntity.ok(todoService.findTodosByDate(userId, startDateTime, endDateTime));
     }
 
     @GetMapping("/search")
@@ -90,17 +94,17 @@ public class TodoController {
             HttpServletRequest request,
             @RequestParam(name = "keyword") @NotBlank(message = "검색어는 필수입니다.") String keyword
     ) {
-        User user = getSessionUserOrThrow(request);
-        return ResponseEntity.ok(todoService.searchTodos(user.getUserId(), keyword));
+        String userId = getSessionUserIdOrThrow(request);
+        return ResponseEntity.ok(todoService.searchTodos(userId, keyword));
     }
 
-    private User getSessionUserOrThrow(HttpServletRequest request) {
+    private String getSessionUserIdOrThrow(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
-        if (session == null || session.getAttribute("user") == null) {
+        if (session == null || session.getAttribute(SESSION_USER_ID) == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
 
-        return (User) session.getAttribute("user");
+        return (String) session.getAttribute(SESSION_USER_ID);
     }
 }

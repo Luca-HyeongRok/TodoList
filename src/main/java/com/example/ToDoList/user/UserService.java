@@ -35,16 +35,17 @@ public class UserService {
     }
 
     public User authenticate(String userId, String rawPassword) {
-        Optional<User> existingUser = userRepository.findByUserId(userId);
-        if (existingUser.isEmpty()) {
-            throw new UnauthorizedException("아이디 또는 비밀번호가 올바르지 않습니다.");
-        }
+        User user = getUserOrThrow(userId);
 
-        User user = existingUser.get();
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new UnauthorizedException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
         return user;
+    }
+
+    public User getUserOrThrow(String userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UnauthorizedException("로그인이 필요합니다."));
     }
 }

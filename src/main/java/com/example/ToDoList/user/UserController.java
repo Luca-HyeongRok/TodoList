@@ -15,6 +15,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
 
+    private static final String SESSION_USER_ID = "userId";
+
     private final UserService userService;
 
     @PostMapping("/register")
@@ -28,24 +30,25 @@ public class UserController {
         User user = userService.authenticate(userDTO.getUserId(), userDTO.getPassword());
 
         HttpSession session = request.getSession();
-        session.setAttribute("user", user);
+        session.setAttribute(SESSION_USER_ID, user.getUserId());
 
         return ResponseEntity.ok(new UserDTO(user.getUserId(), null, user.getUsername()));
     }
 
     @GetMapping("/session")
     public ResponseEntity<UserDTO> getSessionUser(HttpServletRequest request) {
-        User user = getSessionUserOrThrow(request);
+        String userId = getSessionUserIdOrThrow(request);
+        User user = userService.getUserOrThrow(userId);
         return ResponseEntity.ok(new UserDTO(user.getUserId(), null, user.getUsername()));
     }
 
-    private User getSessionUserOrThrow(HttpServletRequest request) {
+    private String getSessionUserIdOrThrow(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
-        if (session == null || session.getAttribute("user") == null) {
+        if (session == null || session.getAttribute(SESSION_USER_ID) == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
 
-        return (User) session.getAttribute("user");
+        return (String) session.getAttribute(SESSION_USER_ID);
     }
 }
