@@ -33,7 +33,10 @@ const Header = ({ selectedDate, setSelectedDate, moveDate }) => {
         credentials: "include",
       });
 
-      if (!response.ok) {
+      if (response.status === 404) {
+        // Backend branch may not have logout endpoint yet.
+        console.info("로그아웃 API가 없어 클라이언트 상태만 정리합니다.");
+      } else if (!response.ok) {
         console.warn("서버 로그아웃 요청 실패:", response.status);
       }
     } catch (error) {
@@ -56,6 +59,7 @@ const Header = ({ selectedDate, setSelectedDate, moveDate }) => {
       <div>
         <DatePicker
           selected={selectedDate}
+          showMonthYearDropdown
           onChange={handleDateChange}
           dateFormat="yyyy-MM-dd"
           className="date-picker-input"
