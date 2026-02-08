@@ -1,18 +1,12 @@
 import "./Home.css";
 import { BASE_URL } from "../config";
-import {
-  useState,
-  useReducer,
-  useEffect,
-  useCallback,
-  createContext,
-  useMemo,
-} from "react";
+import { useState, useReducer, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Editor from "../components/Editor";
 import List from "../components/List";
 import Footer from "../components/Footer";
+import { TodoStateContext, TodoDispatchContext } from "../contexts/TodoContext";
 
 const fetchTodosByDate = async (date) => {
   try {
@@ -25,7 +19,7 @@ const fetchTodosByDate = async (date) => {
       throw new Error("해당 날짜의 할 일 목록을 불러오지 못했습니다.");
     }
 
-    return await respnsoe.json();
+    return await response.json();
   } catch (error) {
     console.error("할 일 목록 불러오기 오류:", error);
     return [];
@@ -59,9 +53,6 @@ const checkSession = async () => {
     return null;
   }
 };
-
-export const TodoStateContext = createContext();
-export const TodoDispatchContext = createContext();
 
 function reducer(state, action) {
   switch (action.type) {

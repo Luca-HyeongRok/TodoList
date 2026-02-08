@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useContext } from "react";
 import "./List.css";
 import TodoItem from "./TodoItem";
-import { TodoStateContext } from "../pages/Home";
+import { TodoStateContext } from "../contexts/TodoContext";
 import { BASE_URL } from "../config";
 
 const List = () => {

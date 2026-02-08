@@ -1,4 +1,4 @@
-import { TodoDispatchContext } from "../pages/Home";
+import { TodoDispatchContext } from "../contexts/TodoContext";
 import "./TodoItem.css";
 import { memo, useContext, useState } from "react";
 import DeleteModal from "./DeleteModal";

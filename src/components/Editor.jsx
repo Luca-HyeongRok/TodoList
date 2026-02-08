@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import GetDataModal from "./GetDataModal";
-import { TodoDispatchContext } from "../pages/Home";
+import { TodoDispatchContext } from "../contexts/TodoContext";
 import "./Editor.css";
 
 const Editor = ({ selectedDate }) => {
