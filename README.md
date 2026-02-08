@@ -2,6 +2,10 @@
 
 날짜별 할 일을 관리하는 TodoList 프로젝트입니다.
 
+| 화면 1 | 화면 2 | 화면 3 |
+|-------|-------|-------|
+| ![](https://github.com/user-attachments/assets/bf6edbab-df8c-4393-a8d8-482030d73313) | ![](https://github.com/user-attachments/assets/bd9547d7-27d6-48d4-a47e-ee829b2c8c90) | ![](https://github.com/user-attachments/assets/6d845209-905e-4e68-addf-154b073021b9) |
+
 ## 브랜치 안내
 - `front`: 프론트엔드
 - `master`: 백엔드
