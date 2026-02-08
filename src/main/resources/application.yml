@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   main:
     log-startup-info: false
   datasource:
@@ -8,16 +8,18 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
+    defer-datasource-initialization: true
     hibernate:
-      ddl-auto: update  #테이블 자동 생성/업데이트
-    show-sql: true      #SQL 쿼리 출력 (디버깅용)
+      ddl-auto: update  #?뚯씠釉??먮룞 ?앹꽦/?낅뜲?댄듃
+    show-sql: true      #SQL 荑쇰━ 異쒕젰 (?붾쾭源낆슜)
     properties:
       hibernate:
-        format_sql: true  #SQL 보기 좋게 출력
+        format_sql: true  #SQL 蹂닿린 醫뗪쾶 異쒕젰
   sql:
     init:
-      mode: always  #애플리케이션 시작 시 초기 SQL 실행
+      mode: always  #?좏뵆由ъ??댁뀡 ?쒖옉 ??珥덇린 SQL ?ㅽ뻾
 server:
   servlet:
     session:
-      tracking-modes: cookie  #세션을 쿠키로 관리
+      tracking-modes: cookie  #?몄뀡??荑좏궎濡?愿由?
+
