@@ -1,57 +1,140 @@
-# TodoList
-누구나 쉽게 할 수 있는 TodoList를 만들고 싶었습니다.
-사용자가 날짜별로 할 일을 추가할 수 있고 수정 및 삭제가 가능한 일정 관리 웹 애플리케이션 입니다.
+﻿# TodoList
 
-브랜치에 
-front = 프론트
-master = 백
-입니다.
+날짜별 할 일을 관리하는 TodoList 프로젝트입니다.
 
-기능 목록으로는 
-로그인 / 로그아웃
-할 일 생성 / 수정 / 삭제 / 완료 체크
-날짜별 할 일 조회
-검색 기능 (할 일 제목으로 검색가능)
+## 브랜치 안내
+- `front`: 프론트엔드
+- `master`: 백엔드
 
+## 브랜치별 구조
 
-주요 페이지
-Home.jsx
-할 일 목록을 표시하는 메인페이지
-useReducer와 useContext를 활용해 상태관리 
+### Front (`origin/front`)
+```text
+.
+├─ src/
+│  ├─ components/      # Header, Editor, List, TodoItem, Modal 등 UI 컴포넌트
+│  ├─ pages/           # Login, Register, Home, NotFound
+│  ├─ contexts/        # TodoContext
+│  ├─ routes/          # AppRouter
+│  ├─ config.js        # API base, mock mode 설정
+│  └─ main.jsx         # 앱 진입점
+├─ index.html
+├─ package.json
+└─ vite.config.js
+```
 
-주요 컴포넌트 및 설명
--Header.jsx
-날짜 선택 / 이동
-로그아웃 기능
--Editor.jsx
-할 일 추가 GetDataModal.jsx(모달 팝업)과 함께 사용
--List.jsx
-현재 날짜 또는 검색된 할 일 목록을 보여주는 리스트
-TodoItem.jsx(개별 할 일 아이템)과 함께 사용됨
--TodoItem.jsx
-개별 할 일 아이템을 표시하는 컴포넌트
-체크박스(완료 여부), 수정 버튼, 삭제 버튼 포함
+#### Front 상세
+- 라우팅
+  - `src/routes/AppRouter.jsx`: `/`(로그인), `/register`, `/home`, `*`(NotFound) 라우트 정의
+- 페이지 레이어
+  - `src/pages/Login.jsx`: 로그인 요청, 세션 확인 전환
+  - `src/pages/Register.jsx`: 회원가입 요청
+  - `src/pages/Home.jsx`: Todo 상태 관리(useReducer), 날짜 이동, CRUD orchestration
+  - `src/pages/NotFound.jsx`: 잘못된 경로 처리
+- 상태 관리
+  - `src/contexts/TodoContext.jsx`: Todo state/dispatch 컨텍스트 제공
+  - `src/pages/Home.jsx`: `CREATE/UPDATE/EDIT/DELETE/SET_TODOS` 리듀서
+- 컴포넌트 레이어
+  - `src/components/Header.jsx`: 날짜 이동, 로그아웃
+  - `src/components/Editor.jsx`: Todo 생성 입력
+  - `src/components/List.jsx`: 목록 렌더링 + 검색(`/api/todos/search`)
+  - `src/components/TodoItem.jsx`: 단건 체크/수정/삭제
+  - `src/components/DeleteModal.jsx`, `src/components/GetDataModal.jsx`: 모달 UI
+- 환경 설정
+  - `src/config.js`: `BASE_URL`, `MOCK_MODE`, `MOCK_USER` 관리
+  - `.env`: `VITE_API_BASE_URL`, `VITE_MOCK_MODE` 주입
+- 빌드/실행
+  - `package.json`: `npm run dev`, `npm run build`, `npm run preview`
 
+### Back (`origin/master`)
+```text
+.
+├─ src/main/java/com/example/ToDoList/
+│  ├─ user/            # UserController, UserService, DTO/Request, Repository
+│  ├─ List/            # TodoController, TodoService, Entity/Request, Repository
+│  ├─ config/          # WebConfig
+│  ├─ exception/       # GlobalExceptionHandler, 커스텀 예외
+│  └─ ToDoListApplication.java
+├─ src/main/resources/
+│  ├─ application.yml
+│  └─ db/migration/    # Flyway SQL
+├─ build.gradle
+└─ settings.gradle
+```
 
-기능Api
+#### Back 상세
+- API 계층
+  - `src/main/java/com/example/ToDoList/user/UserController.java`
+    - `/api/users/register`, `/api/users/login`, `/api/users/logout`, `/api/users/session`
+  - `src/main/java/com/example/ToDoList/List/TodoController.java`
+    - `/api/todos` CRUD, `/api/todos/date`, `/api/todos/search`
+- 서비스 계층
+  - `src/main/java/com/example/ToDoList/user/UserService.java`: 회원가입/인증/조회 로직
+  - `src/main/java/com/example/ToDoList/List/TodoService.java`: Todo 생성/수정/삭제/검색/날짜 조회 로직
+- 영속성 계층
+  - `src/main/java/com/example/ToDoList/user/UserRepository.java`
+  - `src/main/java/com/example/ToDoList/List/TodoRepository.java`
+  - JPA 기반으로 DB 접근
+- 도메인/DTO
+  - `src/main/java/com/example/ToDoList/user/User.java`, `UserDTO.java`, `LoginRequest.java`, `RegisterRequest.java`
+  - `src/main/java/com/example/ToDoList/List/Todo.java`, `TodoUpsertRequest.java`, `TodoCheckUpdateRequest.java`
+- 예외/설정
+  - `src/main/java/com/example/ToDoList/exception/GlobalExceptionHandler.java`: 예외 응답 통합 처리
+  - `src/main/java/com/example/ToDoList/config/WebConfig.java`: CORS/웹 설정
+  - 세션 키 `userId`로 인증 상태 유지 (쿠키 세션)
+- DB 마이그레이션
+  - `src/main/resources/db/migration/V1__create_tables.sql`
+  - `src/main/resources/db/migration/V2__seed_data.sql`
+  - Flyway 자동 마이그레이션
+- 실행 설정
+  - `src/main/resources/application.yml`: MySQL datasource, JPA, Flyway, session 설정
+  - `.env`: `DB_PASSWORD` 등 민감정보 주입
 
-![Api1](https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_1.png)
+## 주요 기능
+- 회원가입 / 로그인 / 로그아웃
+- 할 일 생성 / 수정 / 삭제 / 완료 체크
+- 날짜별 할 일 조회
+- 검색 기능 (할 일 제목 기준)
 
-![Api2](https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_2.png)
+## Mock 로그인 안내
+- `VITE_MOCK_MODE=true`일 때 Mock 모드로 동작합니다.
+- Mock 모드에서는 **고정 아이디/비밀번호가 없습니다.**
+- 아이디/비밀번호에 빈 값만 아니면 로그인됩니다.
 
-![Api3](https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_3.png)
+## API
+- `POST /api/users/login`
+- `GET /api/users/session`
+- `POST /api/users/logout`
+- `POST /api/users/register`
+- `GET /api/todos/date?date={date}`
+- `GET /api/todos/search?keyword={keyword}`
+- `POST /api/todos`
+- `PATCH /api/todos/{listId}`
+- `PATCH /api/todos/edit/{listId}`
+- `DELETE /api/todos/{listId}`
 
-![Api4](https://github.com/Luca-HyeongRok/TodoList/blob/main/Screenshot_4.png)
+## API 스크린샷
+![Api1](./Screenshot_1.png)
+![Api2](./Screenshot_2.png)
+![Api3](./Screenshot_3.png)
+![Api4](./Screenshot_4.png)
 
-DB설계
-User 테이블(사용자 정보)
+## 주요 페이지/컴포넌트
+- `Home`: 할 일 목록 메인 페이지
+- `Login`: 로그인 페이지
+- `Register`: 회원가입 페이지
+- `NotFound`: 404 페이지
+
+## DB 스키마
+```sql
 CREATE TABLE users (
     user_id VARCHAR(50) PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL
 );
+```
 
-list_tb 테이블 (할 일 목록)
+```sql
 CREATE TABLE list_tb (
     list_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     content VARCHAR(255) NOT NULL,
@@ -62,8 +145,7 @@ CREATE TABLE list_tb (
     user_id VARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
-users 테이블과 list_tb 테이블이 1:N 관계를 가짐
-user_id가 list_tb에서 외래 키로 사용
-특정 사용자가 삭제되면 해당 사용자의 할 일도 CASCADE DELETE 됨
+```
 
-
+- `users` : `list_tb` = 1:N
+- 사용자 삭제 시 해당 사용자의 할 일은 `CASCADE DELETE` 됩니다.
