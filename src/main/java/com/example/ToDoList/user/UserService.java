@@ -1,5 +1,7 @@
 package com.example.ToDoList.user;
 
+import com.example.ToDoList.exception.BadRequestException;
+import com.example.ToDoList.exception.UnauthorizedException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +21,7 @@ public class UserService {
         Optional<User> existingUser = userRepository.findByUserId(userDto.getUserId());
 
         if (existingUser.isPresent()) {
-            return "이미 존재하는 아이디입니다.";
+            throw new BadRequestException("이미 존재하는 아이디입니다.");
         }
 
         User newUser = new User(
@@ -36,12 +38,12 @@ public class UserService {
     public User authenticate(String userId, String rawPassword) {
         Optional<User> existingUser = userRepository.findByUserId(userId);
         if (existingUser.isEmpty()) {
-            return null;
+            throw new UnauthorizedException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
         User user = existingUser.get();
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            return null;
+            throw new UnauthorizedException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
         return user;

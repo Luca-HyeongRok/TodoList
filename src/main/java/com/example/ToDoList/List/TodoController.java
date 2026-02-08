@@ -1,10 +1,11 @@
 package com.example.ToDoList.List;
 
+import com.example.ToDoList.exception.BadRequestException;
+import com.example.ToDoList.exception.UnauthorizedException;
 import com.example.ToDoList.user.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,86 +27,40 @@ public class TodoController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<?> getTodos(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        User user = (User) session.getAttribute("user");
+    public ResponseEntity<List<Todo>> getTodos(HttpServletRequest request) {
+        User user = getSessionUserOrThrow(request);
         return ResponseEntity.ok(todoService.findTodosByUserId(user.getUserId()));
     }
 
     @GetMapping("/{listId}")
-    public ResponseEntity<?> getTodoByListId(HttpServletRequest request, @PathVariable Integer listId) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        User user = (User) session.getAttribute("user");
-        try {
-            return ResponseEntity.ok(todoService.getTodoById(listId, user.getUserId()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<Todo> getTodoByListId(HttpServletRequest request, @PathVariable Integer listId) {
+        User user = getSessionUserOrThrow(request);
+        return ResponseEntity.ok(todoService.getTodoById(listId, user.getUserId()));
     }
 
     @PatchMapping("/{listId}")
-    public ResponseEntity<?> updateTodoCheck(HttpServletRequest request, @PathVariable Integer listId, @RequestBody Todo updatedTodo) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        User user = (User) session.getAttribute("user");
-        try {
-            return ResponseEntity.ok(todoService.updateTodoCheckbox(listId, user.getUserId(), updatedTodo));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<Todo> updateTodoCheck(HttpServletRequest request, @PathVariable Integer listId, @RequestBody Todo updatedTodo) {
+        User user = getSessionUserOrThrow(request);
+        return ResponseEntity.ok(todoService.updateTodoCheckbox(listId, user.getUserId(), updatedTodo));
     }
 
     @PatchMapping("/edit/{listId}")
-    public ResponseEntity<?> updateTodo(HttpServletRequest request, @PathVariable Integer listId, @RequestBody Todo updatedTodo) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        User user = (User) session.getAttribute("user");
-        try {
-            Todo savedTodo = todoService.updateTodo(listId, user.getUserId(), updatedTodo);
-            return ResponseEntity.ok(savedTodo);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<Todo> updateTodo(HttpServletRequest request, @PathVariable Integer listId, @RequestBody Todo updatedTodo) {
+        User user = getSessionUserOrThrow(request);
+        Todo savedTodo = todoService.updateTodo(listId, user.getUserId(), updatedTodo);
+        return ResponseEntity.ok(savedTodo);
     }
 
     @DeleteMapping("/{listId}")
-    public ResponseEntity<?> deleteTodo(HttpServletRequest request, @PathVariable Integer listId) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        User user = (User) session.getAttribute("user");
-        try {
-            todoService.deleteTodo(listId, user.getUserId());
-            return ResponseEntity.ok("삭제 완료");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<String> deleteTodo(HttpServletRequest request, @PathVariable Integer listId) {
+        User user = getSessionUserOrThrow(request);
+        todoService.deleteTodo(listId, user.getUserId());
+        return ResponseEntity.ok("삭제 완료");
     }
 
     @PostMapping
-    public ResponseEntity<?> createTodo(HttpServletRequest request, @RequestBody Todo newTodo) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        User loggedInUser = (User) session.getAttribute("user");
+    public ResponseEntity<Todo> createTodo(HttpServletRequest request, @RequestBody Todo newTodo) {
+        User loggedInUser = getSessionUserOrThrow(request);
         newTodo.setUser(loggedInUser);
 
         Todo savedTodo = todoService.createTodo(newTodo);
@@ -113,13 +68,8 @@ public class TodoController {
     }
 
     @GetMapping("/date")
-    public ResponseEntity<?> getTodosByDate(@RequestParam String date, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        User user = (User) session.getAttribute("user");
+    public ResponseEntity<List<Todo>> getTodosByDate(@RequestParam String date, HttpServletRequest request) {
+        User user = getSessionUserOrThrow(request);
 
         LocalDateTime startDateTime;
         LocalDateTime endDateTime;
@@ -128,8 +78,7 @@ public class TodoController {
             startDateTime = selectedDate.atStartOfDay();
             endDateTime = selectedDate.atTime(23, 59, 59);
         } catch (DateTimeParseException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("잘못된 날짜 형식입니다. YYYY-MM-DD 형식이어야 합니다.");
+            throw new BadRequestException("잘못된 날짜 형식입니다. YYYY-MM-DD 형식이어야 합니다.");
         }
 
         List<Todo> todos = todoService.findTodosByDate(user.getUserId(), startDateTime, endDateTime);
@@ -138,17 +87,23 @@ public class TodoController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchTodos(HttpServletRequest request, @RequestParam(name = "keyword", required = false) String keyword) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
+        User user = getSessionUserOrThrow(request);
 
         if (keyword == null || keyword.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Collections.emptyList());
         }
 
-        User user = (User) session.getAttribute("user");
         List<Todo> results = todoService.searchTodos(user.getUserId(), keyword);
         return ResponseEntity.ok(results);
+    }
+
+    private User getSessionUserOrThrow(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("user") == null) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
+
+        return (User) session.getAttribute("user");
     }
 }

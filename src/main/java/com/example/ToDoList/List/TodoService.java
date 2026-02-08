@@ -1,5 +1,6 @@
 package com.example.ToDoList.List;
 
+import com.example.ToDoList.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class TodoService {
     private Todo getOwnedTodo(Integer listId, String userId) {
         Optional<Todo> todoOptional = todoRepository.findByListIdAndUser_UserId(listId, userId);
         if (todoOptional.isEmpty()) {
-            throw new RuntimeException("Todo 항목을 찾을 수 없습니다. ID: " + listId);
+            throw new NotFoundException("Todo 항목을 찾을 수 없습니다. ID: " + listId);
         }
         return todoOptional.get();
     }
