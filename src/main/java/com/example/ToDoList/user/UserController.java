@@ -35,6 +35,15 @@ public class UserController {
         return ResponseEntity.ok(new UserDTO(user.getUserId(), null, user.getUsername()));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return ResponseEntity.ok(Map.of("message", "로그아웃되었습니다."));
+    }
+
     @GetMapping("/session")
     public ResponseEntity<UserDTO> getSessionUser(HttpServletRequest request) {
         String userId = getSessionUserIdOrThrow(request);
